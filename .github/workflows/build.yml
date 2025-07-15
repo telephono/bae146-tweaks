@@ -15,11 +15,9 @@ jobs:
       - run: |
           rustup target add x86_64-unknown-linux-gnu
       - run: |
-          mkdir -p ${output_name}/lin_x64
+          mkdir -p ${{ inputs.output-path }}/lin_x64
           cargo build --target x86_64-unknown-linux-gnu --release
-          cp target/x86_64-unknown-linux-gnu/release/lib${output_name}.so ${output_name}/lin_x64/${output_name}.xpl
-        env:
-          output_name: ${{ inputs.output-path }}
+          cp target/x86_64-unknown-linux-gnu/release/lib${{ inputs.output-path }}.so ${{ inputs.output-path }}/lin_x64/${{ inputs.output-path }}.xpl
       - uses: actions/upload-artifact@v4
         with:
           name: lin_x64
@@ -33,12 +31,10 @@ jobs:
           rustup target add aarch64-apple-darwin
           rustup target add x86_64-apple-darwin
       - run: |
-          mkdir -p ${output_name}/mac_x64
+          mkdir -p ${{ inputs.output-path }}/mac_x64
           cargo build --target aarch64-apple-darwin --release
           cargo build --target x86_64-apple-darwin --release
-          llvm-lipo -create -output ${output_name}/mac_x64/${output_name}.xpl target/aarch64-apple-darwin/release/lib${output_name}.dylib target/x86_64-apple-darwin/release/lib${output_name}.dylib
-        env:
-          output_name: ${{ inputs.output-path }}
+          llvm-lipo -create -output ${{ inputs.output-path }}/mac_x64/${{ inputs.output-path }}.xpl target/aarch64-apple-darwin/release/lib${{ inputs.output-path }}.dylib target/x86_64-apple-darwin/release/lib${{ inputs.output-path }}.dylib
       - uses: actions/upload-artifact@v4
         with:
           name: mac_x64
@@ -51,11 +47,9 @@ jobs:
       - run: |
           rustup target add x86_64-pc-windows-gnu
       - run: |
-          mkdir -p ${output_name}/win_x64
+          mkdir -p ${{ inputs.output-path }}/win_x64
           cargo build --target x86_64-pc-windows-gnu --release
-          cp target/x86_64-pc-windows-gnu/release/${output_name}.dll ${output_name}/win_x64/${output_name}.xpl
-        env:
-          output_name: ${{ inputs.output-path }}
+          cp target/x86_64-pc-windows-gnu/release/${{ inputs.output-path }}.dll ${{ inputs.output-path }}/win_x64/${{ inputs.output-path }}.xpl
       - uses: actions/upload-artifact@v4
         with:
           name: win_x64
