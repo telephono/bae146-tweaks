@@ -9,6 +9,7 @@ pub(crate) struct FlightLoopHandler {
     initialization_done: bool,
     onetime_actions_done: bool,
 
+    /// sim/view/default_view
     default_view: Command,
 
     /// thranda/electrical/ExtPwrGPUAvailable
