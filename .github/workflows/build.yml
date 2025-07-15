@@ -28,6 +28,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends gcc-multilib
+      - run: |
           rustup target add aarch64-apple-darwin
           rustup target add x86_64-apple-darwin
       - run: |
@@ -44,7 +47,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: egor-tensin/setup-mingw@v2
+      - run: |
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends mingw-w64
       - run: |
           rustup target add x86_64-pc-windows-gnu
       - run: |
