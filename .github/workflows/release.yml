@@ -1,0 +1,33 @@
+name: release.yml
+
+on:
+  workflow_call:
+    inputs:
+      output-path:
+        required: true
+        type: string
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+    with:
+      output-path: |
+        tweaks
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [ build ]
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: ${{ inputs.output-path }}
+          merge-multiple: 'true'
+      - run: zip -r ${output_name}-${ref_name}.zip ${output_name}/
+        env:
+          ref_name: ${{ github.ref_name }}
+          output_name: ${{ inputs.output-path }}
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ inputs.output-path }} ${{ github.ref_name }}
+          draft: true
+          files: ${{ inputs.output-path }}-*.zip

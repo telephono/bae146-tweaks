@@ -1,0 +1,14 @@
+name: ci.yml
+
+on:
+  pull_request:
+    paths:
+      - src/**/*
+      - Cargo.toml
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+    with:
+      output-path: |
+        tweaks

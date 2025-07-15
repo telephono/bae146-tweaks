@@ -1,0 +1,13 @@
+name: publish.yml
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build:
+    uses: ./.github/workflows/release.yml
+    with:
+      output-path: |
+        tweaks

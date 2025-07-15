@@ -1,0 +1,23 @@
+[package]
+name = "tweaks"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+
+[features]
+default = ["fixgpu", "fixnws", "fixradio", "syncthrottle"]
+debug = []
+fixautothrottle = []                                       # Fixed in v1.0.2
+fixgpu = []
+fixnws = []
+fixradio = []
+fixtms = []                                                # Fixed in v1.0.2
+syncthrottle = []
+
+[dependencies]
+thiserror = "2.0"
+xplm = "0.4.2"
+
+[lib]
+crate-type = ["cdylib"]
