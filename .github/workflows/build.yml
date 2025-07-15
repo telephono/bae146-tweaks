@@ -24,12 +24,9 @@ jobs:
           path: ${{ inputs.output-path }}
 
   build_macos:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - run: |
-          sudo apt-get update
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends gcc-multilib
       - run: |
           rustup target add aarch64-apple-darwin
           rustup target add x86_64-apple-darwin
@@ -37,7 +34,7 @@ jobs:
           mkdir -p ${{ inputs.output-path }}/mac_x64
           cargo build --target aarch64-apple-darwin --release
           cargo build --target x86_64-apple-darwin --release
-          llvm-lipo -create -output ${{ inputs.output-path }}/mac_x64/${{ inputs.output-path }}.xpl target/aarch64-apple-darwin/release/lib${{ inputs.output-path }}.dylib target/x86_64-apple-darwin/release/lib${{ inputs.output-path }}.dylib
+          lipo -create -output ${{ inputs.output-path }}/mac_x64/${{ inputs.output-path }}.xpl target/aarch64-apple-darwin/release/lib${{ inputs.output-path }}.dylib target/x86_64-apple-darwin/release/lib${{ inputs.output-path }}.dylib
       - uses: actions/upload-artifact@v4
         with:
           name: mac_x64
