@@ -44,6 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: egor-tensin/setup-mingw@v2
       - run: |
           rustup target add x86_64-pc-windows-gnu
       - run: |
