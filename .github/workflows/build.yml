@@ -41,18 +41,15 @@ jobs:
           path: ${{ inputs.output-path }}
 
   build_windows:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
       - run: |
-          sudo apt-get update
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends mingw-w64
-      - run: |
-          rustup target add x86_64-pc-windows-gnu
+          rustup target add x86_64-pc-windows-msvc
       - run: |
           mkdir -p ${{ inputs.output-path }}/win_x64
-          cargo build --target x86_64-pc-windows-gnu --release
-          cp target/x86_64-pc-windows-gnu/release/${{ inputs.output-path }}.dll ${{ inputs.output-path }}/win_x64/${{ inputs.output-path }}.xpl
+          cargo build --target x86_64-pc-windows-msvc --release
+          cp target/x86_64-pc-windows-msvc/release/${{ inputs.output-path }}.dll ${{ inputs.output-path }}/win_x64/${{ inputs.output-path }}.xpl
       - uses: actions/upload-artifact@v4
         with:
           name: win_x64
