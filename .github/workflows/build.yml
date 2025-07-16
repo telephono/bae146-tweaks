@@ -13,8 +13,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
-          rustup target add x86_64-unknown-linux-gnu
-      - run: |
           mkdir -p ${{ inputs.output-path }}/lin_x64
           cargo build --target x86_64-unknown-linux-gnu --release
           cp target/x86_64-unknown-linux-gnu/release/lib${{ inputs.output-path }}.so ${{ inputs.output-path }}/lin_x64/${{ inputs.output-path }}.xpl
@@ -27,9 +25,6 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - run: |
-          rustup target add aarch64-apple-darwin
-          rustup target add x86_64-apple-darwin
       - run: |
           mkdir -p ${{ inputs.output-path }}/mac_x64
           cargo build --target aarch64-apple-darwin --release
@@ -44,8 +39,6 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - run: |
-          rustup target add x86_64-pc-windows-msvc
       - run: |
           mkdir -p ${{ inputs.output-path }}/win_x64
           cargo build --target x86_64-pc-windows-msvc --release
