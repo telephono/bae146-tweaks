@@ -27,6 +27,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
+          rustup target add x86_64-apple-darwin
+      - run: |
           mkdir -p ${{ inputs.output-path }}/mac_x64
           cargo build --target aarch64-apple-darwin --release
           cargo build --target x86_64-apple-darwin --release
