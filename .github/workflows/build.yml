@@ -4,6 +4,7 @@ on:
   workflow_call:
     inputs:
       output-path:
+        description: The package name as defined in Cargo.toml. It must not contain any dashes.
         required: true
         type: string
 
@@ -12,8 +13,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: |
-          rustup target add x86_64-unknown-linux-gnu
       - run: |
           mkdir -p ${{ inputs.output-path }}/lin_x64
           cargo build --target x86_64-unknown-linux-gnu --release
@@ -28,7 +27,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
-          rustup target add aarch64-apple-darwin
           rustup target add x86_64-apple-darwin
       - run: |
           mkdir -p ${{ inputs.output-path }}/mac_x64
@@ -41,32 +39,14 @@ jobs:
           path: ${{ inputs.output-path }}
 
   build_windows:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
       - run: |
-          sudo apt-get update
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends mingw-w64
-      - run: |
-          rustup target add x86_64-pc-windows-gnu
-      - run: |
           mkdir -p ${{ inputs.output-path }}/win_x64
-          cargo build --target x86_64-pc-windows-gnu --release
-          cp target/x86_64-pc-windows-gnu/release/${{ inputs.output-path }}.dll ${{ inputs.output-path }}/win_x64/${{ inputs.output-path }}.xpl
+          cargo build --target x86_64-pc-windows-msvc --release
+          cp target/x86_64-pc-windows-msvc/release/${{ inputs.output-path }}.dll ${{ inputs.output-path }}/win_x64/${{ inputs.output-path }}.xpl
       - uses: actions/upload-artifact@v4
         with:
           name: win_x64
-          path: ${{ inputs.output-path }}
-
-  build_docs:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: |
-          mkdir -p ${{ inputs.output-path }}
-          cp LICENSE ${{ inputs.output-path }}/LICENSE.txt
-          cp README.md ${{ inputs.output-path }}/README.md
-      - uses: actions/upload-artifact@v4
-        with:
-          name: docs
           path: ${{ inputs.output-path }}
