@@ -50,16 +50,3 @@ jobs:
         with:
           name: win_x64
           path: ${{ inputs.output-path }}
-
-  build_docs:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: |
-          mkdir -p ${{ inputs.output-path }}
-          cp LICENSE ${{ inputs.output-path }}/LICENSE.txt
-          cp README.md ${{ inputs.output-path }}/README.md
-      - uses: actions/upload-artifact@v4
-        with:
-          name: docs
-          path: ${{ inputs.output-path }}
