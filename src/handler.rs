@@ -93,7 +93,7 @@ impl FlightLoopHandler {
         Ok(handler)
     }
 
-    /// Fetch SASL datarefs if they are available, otherwise return an error
+    /// Fetch SASL datarefs if they are available
     fn initialize(&mut self) -> Result<(), PluginError> {
         if self.thranda_gpu_available.is_none() {
             self.thranda_gpu_available =

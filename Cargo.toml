@@ -5,9 +5,9 @@ edition = "2024"
 license = "MIT"
 publish = false
 
+[lib]
+crate-type = ["cdylib"]
+
 [dependencies]
 thiserror = "2.0"
 xplm = "0.4.2"
-
-[lib]
-crate-type = ["cdylib"]

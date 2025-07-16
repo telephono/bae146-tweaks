@@ -40,7 +40,6 @@ impl Plugin for TweaksPlugin {
 
     fn enable(&mut self) -> Result<(), Self::Error> {
         self.flight_loop.schedule_after_loops(300);
-
         debugln!("{PLUGIN_NAME} enabled");
         Ok(())
     }
