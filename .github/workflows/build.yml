@@ -9,7 +9,7 @@ on:
         type: string
 
 jobs:
-  build_linux:
+  lin_x64:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,7 +24,7 @@ jobs:
           name: lin_x64
           path: ${{ inputs.output-path }}
 
-  build_macos:
+  mac_x64:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -41,7 +41,7 @@ jobs:
           name: mac_x64
           path: ${{ inputs.output-path }}
 
-  build_windows:
+  win_x64:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
