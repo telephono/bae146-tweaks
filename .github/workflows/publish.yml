@@ -15,7 +15,7 @@ jobs:
       output-path: tweaks
 
   release:
-    needs: [ build ]
+    needs: build
     uses: ./.github/workflows/_release.yml
     with:
       output-path: tweaks
