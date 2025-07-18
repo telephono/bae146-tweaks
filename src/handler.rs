@@ -233,7 +233,5 @@ impl CheckHandler for SyncThrottlesMenuHandler {
             checked,
             item.checked(),
         );
-
-        item.set_checked(checked);
     }
 }
