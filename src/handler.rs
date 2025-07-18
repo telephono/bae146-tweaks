@@ -228,10 +228,17 @@ pub(crate) struct SyncThrottlesMenuHandler;
 
 impl CheckHandler for SyncThrottlesMenuHandler {
     fn item_checked(&mut self, item: &CheckItem, checked: bool) {
-        debugln!(
-            "{PLUGIN_NAME} SyncThrottlesMenuHandler: checked = {:?}, item = {:?}",
-            checked,
-            item.checked(),
-        );
+        if let Some(mut sync_throttles) = SYNC_THROTTLES.lock().ok() {
+            debugln!(
+                "{PLUGIN_NAME} SyncThrottlesMenuHandler: checked = {:?}, item = {:?}, sync_throttles = {:?}",
+                checked,
+                item.checked(),
+                sync_throttles.clone(),
+            );
+
+            if sync_throttles.clone() != checked {
+                *sync_throttles = checked;
+            }
+        }
     }
 }
