@@ -18,7 +18,7 @@ pub(crate) static SYNC_THROTTLES: Mutex<bool> = Mutex::new(true);
 
 pub(crate) struct TweaksPlugin {
     flight_loop: FlightLoop,
-    menu: Menu,
+    _menu: Menu,
 }
 
 impl Plugin for TweaksPlugin {
@@ -36,7 +36,7 @@ impl Plugin for TweaksPlugin {
             _ => return Err(PluginError::AircraftNotSupported(acf_icao)),
         }
 
-        let sync_throttles = SYNC_THROTTLES.try_lock().map_or(false, |l| l.clone());
+        let sync_throttles = SYNC_THROTTLES.try_lock().is_ok_and(|l| *l);
         let menu = Menu::new(env!("CARGO_PKG_NAME"))?;
         menu.add_child(CheckItem::new(
             "Sync throttles",
@@ -49,7 +49,7 @@ impl Plugin for TweaksPlugin {
 
         let plugin = Self {
             flight_loop: FlightLoop::new(handler),
-            menu,
+            _menu: menu,
         };
 
         debugln!("{PLUGIN_NAME} startup complete");

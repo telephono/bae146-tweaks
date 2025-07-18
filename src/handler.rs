@@ -179,7 +179,7 @@ impl FlightLoopHandler {
 
     /// Align throttle lever 3 and 4 with throttle lever 2
     fn synchonize_throttle_levers(&mut self) {
-        let sync_throttles = SYNC_THROTTLES.try_lock().map_or(false, |l| l.clone());
+        let sync_throttles = SYNC_THROTTLES.try_lock().is_ok_and(|l| *l);
         if sync_throttles {
             self.throttle_ratio.get(&mut self.throttle_ratio_slice);
 
@@ -228,15 +228,15 @@ pub(crate) struct SyncThrottlesMenuHandler;
 
 impl CheckHandler for SyncThrottlesMenuHandler {
     fn item_checked(&mut self, item: &CheckItem, checked: bool) {
-        if let Some(mut sync_throttles) = SYNC_THROTTLES.lock().ok() {
+        if let Ok(mut sync_throttles) = SYNC_THROTTLES.lock() {
             debugln!(
                 "{PLUGIN_NAME} SyncThrottlesMenuHandler: checked = {:?}, item = {:?}, sync_throttles = {:?}",
                 checked,
                 item.checked(),
-                sync_throttles.clone(),
+                *sync_throttles,
             );
 
-            if sync_throttles.clone() != checked {
+            if *sync_throttles != checked {
                 *sync_throttles = checked;
             }
         }
