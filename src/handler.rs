@@ -198,8 +198,9 @@ impl FlightLoopCallback for FlightLoopHandler {
             if self.initialize().is_ok() {
                 self.initialization_done = true;
                 debugln!("{PLUGIN_NAME} initialization complete");
+                return;
             } else {
-                // Exit flight loop early and try again after the next interval...
+                // Try again after the next interval...
                 debugln!("{PLUGIN_NAME} waiting for initialization...");
                 return;
             }

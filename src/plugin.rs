@@ -18,7 +18,7 @@ pub(crate) static SYNC_THROTTLES: Mutex<bool> = Mutex::new(true);
 
 pub(crate) struct TweaksPlugin {
     flight_loop: FlightLoop,
-    _menu: Menu,
+    _plugin_menu: Menu,
 }
 
 impl Plugin for TweaksPlugin {
@@ -37,19 +37,19 @@ impl Plugin for TweaksPlugin {
         }
 
         let sync_throttles = SYNC_THROTTLES.try_lock().is_ok_and(|l| *l);
-        let menu = Menu::new(env!("CARGO_PKG_NAME"))?;
-        menu.add_child(CheckItem::new(
+        let _plugin_menu = Menu::new("BAe 146 Tweaks")?;
+        _plugin_menu.add_child(CheckItem::new(
             "Sync throttles",
             sync_throttles,
             SyncThrottlesMenuHandler,
         )?);
-        menu.add_to_plugins_menu();
+        _plugin_menu.add_to_plugins_menu();
 
         let handler = FlightLoopHandler::new()?;
 
         let plugin = Self {
             flight_loop: FlightLoop::new(handler),
-            _menu: menu,
+            _plugin_menu,
         };
 
         debugln!("{PLUGIN_NAME} startup complete");
