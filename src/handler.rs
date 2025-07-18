@@ -2,8 +2,9 @@ use xplm::command::Command;
 use xplm::data::borrowed::DataRef;
 use xplm::data::{ArrayRead, ArrayReadWrite, DataRead, DataReadWrite, ReadWrite};
 use xplm::flight_loop::FlightLoopCallback;
+use xplm::menu::{CheckHandler, CheckItem};
 
-use crate::plugin::{PluginError, PLUGIN_NAME};
+use crate::plugin::{PluginError, PLUGIN_NAME, SYNC_THROTTLES};
 
 pub(crate) struct FlightLoopHandler {
     initialization_done: bool,
@@ -178,12 +179,15 @@ impl FlightLoopHandler {
 
     /// Align throttle lever 3 and 4 with throttle lever 2
     fn synchonize_throttle_levers(&mut self) {
-        self.throttle_ratio.get(&mut self.throttle_ratio_slice);
+        let sync_throttles = SYNC_THROTTLES.try_lock().map_or(false, |l| l.clone());
+        if sync_throttles {
+            self.throttle_ratio.get(&mut self.throttle_ratio_slice);
 
-        self.throttle_ratio_slice[2] = self.throttle_ratio_slice[1];
-        self.throttle_ratio_slice[3] = self.throttle_ratio_slice[1];
+            self.throttle_ratio_slice[2] = self.throttle_ratio_slice[1];
+            self.throttle_ratio_slice[3] = self.throttle_ratio_slice[1];
 
-        self.throttle_ratio.set(&self.throttle_ratio_slice);
+            self.throttle_ratio.set(&self.throttle_ratio_slice);
+        }
     }
 }
 
@@ -217,5 +221,19 @@ impl FlightLoopCallback for FlightLoopHandler {
 
         // Run flightloop callback on every flightloop from now on
         state.call_next_loop();
+    }
+}
+
+pub(crate) struct SyncThrottlesMenuHandler;
+
+impl CheckHandler for SyncThrottlesMenuHandler {
+    fn item_checked(&mut self, item: &CheckItem, checked: bool) {
+        debugln!(
+            "{PLUGIN_NAME} SyncThrottlesMenuHandler: checked = {:?}, item = {:?}",
+            checked,
+            item.checked(),
+        );
+
+        item.set_checked(checked);
     }
 }
