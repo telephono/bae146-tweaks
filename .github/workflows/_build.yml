@@ -11,14 +11,16 @@ on:
 jobs:
   lin_x64:
     runs-on: ubuntu-latest
+    env:
+      TARGET: x86_64-unknown-linux-gnu
     steps:
       - uses: actions/checkout@v4
       - run: |
-          rustup target add x86_64-unknown-linux-gnu
+          rustup target add ${TARGET}
       - run: |
           mkdir -p ${{ inputs.output-path }}/lin_x64
-          cargo build --target x86_64-unknown-linux-gnu --release
-          cp target/x86_64-unknown-linux-gnu/release/lib${{ inputs.output-path }}.so ${{ inputs.output-path }}/lin_x64/${{ inputs.output-path }}.xpl
+          cargo build --target ${TARGET} --release
+          cp target/${TARGET}/release/lib${{ inputs.output-path }}.so ${{ inputs.output-path }}/lin_x64/${{ inputs.output-path }}.xpl
       - uses: actions/upload-artifact@v4
         with:
           name: lin_x64
@@ -43,14 +45,16 @@ jobs:
 
   win_x64:
     runs-on: windows-latest
+    env:
+      TARGET: x86_64-pc-windows-msvc
     steps:
       - uses: actions/checkout@v4
       - run: |
-          rustup target add x86_64-pc-windows-msvc
+          rustup target add $env:TARGET
       - run: |
           mkdir -p ${{ inputs.output-path }}/win_x64
-          cargo build --target x86_64-pc-windows-msvc --release
-          cp target/x86_64-pc-windows-msvc/release/${{ inputs.output-path }}.dll ${{ inputs.output-path }}/win_x64/${{ inputs.output-path }}.xpl
+          cargo build --target $env:TARGET --release
+          cp target/$env:TARGET/release/${{ inputs.output-path }}.dll ${{ inputs.output-path }}/win_x64/${{ inputs.output-path }}.xpl
       - uses: actions/upload-artifact@v4
         with:
           name: win_x64
