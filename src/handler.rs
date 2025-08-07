@@ -52,6 +52,24 @@ pub(crate) struct FlightLoopHandler {
     /// sim/cockpit2/engine/actuators/throttle_ratio
     throttle_ratio: DataRef<[f32], ReadWrite>,
     throttle_ratio_slice: [f32; 4],
+
+    /// sim/cockpit/switches/HSI_selector
+    hsi_selector: DataRef<i32>,
+
+    /// sim/cockpit/switches/HSI_selector2
+    hsi_selector2: DataRef<i32>,
+
+    /// sim/cockpit2/radios/actuators/hsi_obs_deg_mag_pilot
+    hsi_obs_deg_mag_pilot: DataRef<f32>,
+
+    /// sim/cockpit2/radios/actuators/hsi_obs_deg_mag_copilot
+    hsi_obs_deg_mag_copilot: DataRef<f32, ReadWrite>,
+
+    /// thranda/anim/hsiHdefDotsPilot
+    thranda_hsi_hdef_dots_pilot: Option<DataRef<f32>>,
+
+    /// thranda/anim/hsiHdefDotsCoPilot
+    thranda_hsi_hdef_dots_copilot: Option<DataRef<f32, ReadWrite>>,
 }
 
 impl FlightLoopHandler {
@@ -88,6 +106,18 @@ impl FlightLoopHandler {
             throttle_ratio: DataRef::find("sim/cockpit2/engine/actuators/throttle_ratio")?
                 .writeable()?,
             throttle_ratio_slice: [0.0; 4],
+
+            hsi_selector: DataRef::find("sim/cockpit/switches/HSI_selector")?,
+            hsi_selector2: DataRef::find("sim/cockpit/switches/HSI_selector2")?,
+            hsi_obs_deg_mag_pilot: DataRef::find(
+                "sim/cockpit2/radios/actuators/hsi_obs_deg_mag_pilot",
+            )?,
+            hsi_obs_deg_mag_copilot: DataRef::find(
+                "sim/cockpit2/radios/actuators/hsi_obs_deg_mag_copilot",
+            )?
+            .writeable()?,
+            thranda_hsi_hdef_dots_pilot: None,
+            thranda_hsi_hdef_dots_copilot: None,
         };
 
         Ok(handler)
@@ -106,6 +136,16 @@ impl FlightLoopHandler {
 
         if self.thranda_radio_com2_power.is_none() {
             self.thranda_radio_com2_power = Some(DataRef::find("thranda/generic/com1/genCom2Pwr")?);
+        }
+
+        if self.thranda_hsi_hdef_dots_pilot.is_none() {
+            self.thranda_hsi_hdef_dots_pilot =
+                Some(DataRef::find("thranda/anim/hsiHdefDotsPilot")?);
+        }
+
+        if self.thranda_hsi_hdef_dots_copilot.is_none() {
+            self.thranda_hsi_hdef_dots_copilot =
+                Some(DataRef::find("thranda/anim/hsiHdefDotsCoPilo")?.writeable()?)
         }
 
         Ok(())
@@ -176,6 +216,33 @@ impl FlightLoopHandler {
         }
     }
 
+    /// Fix copilot HSI when both HSI are in RNAV mode
+    fn fix_copilot_hsi(&mut self) {
+        let hsi_selector = self.hsi_selector.get();
+        let hsi_selector2 = self.hsi_selector2.get();
+        let hsi_obs_deg_mag_pilot = self.hsi_obs_deg_mag_pilot.get();
+        let hsi_obs_deg_mag_copilot = self.hsi_obs_deg_mag_copilot.get();
+        let thranda_hsi_hdef_dots_pilot = self
+            .thranda_hsi_hdef_dots_pilot
+            .as_ref()
+            .map_or(0.0, |d| d.get());
+        let thranda_hsi_hdef_dots_copilot = self
+            .thranda_hsi_hdef_dots_copilot
+            .as_ref()
+            .map_or(0.0, |d| d.get());
+
+        if (hsi_selector == 2 && hsi_selector2 == 2)
+            && ((thranda_hsi_hdef_dots_pilot != thranda_hsi_hdef_dots_copilot)
+                || (hsi_obs_deg_mag_pilot != hsi_obs_deg_mag_copilot))
+        {
+            self.hsi_obs_deg_mag_copilot.set(hsi_obs_deg_mag_pilot);
+            if let Some(thranda_hsi_hdef_dots_copilot) = self.thranda_hsi_hdef_dots_copilot.as_mut()
+            {
+                thranda_hsi_hdef_dots_copilot.set(thranda_hsi_hdef_dots_pilot);
+            }
+        }
+    }
+
     /// Align throttle lever 3 and 4 with throttle lever 2
     fn synchonize_throttle_levers(&mut self) {
         self.throttle_ratio.get(&mut self.throttle_ratio_slice);
@@ -212,6 +279,8 @@ impl FlightLoopCallback for FlightLoopHandler {
         self.fix_nosewheel_steering();
 
         self.fix_radio();
+
+        self.fix_copilot_hsi();
 
         self.synchonize_throttle_levers();
 
