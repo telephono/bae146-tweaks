@@ -231,14 +231,17 @@ impl FlightLoopHandler {
             .as_ref()
             .map_or(0.0, |d| d.get());
 
-        if (hsi_selector == 2 && hsi_selector2 == 2)
-            && ((thranda_hsi_hdef_dots_pilot != thranda_hsi_hdef_dots_copilot)
-                || (hsi_obs_deg_mag_pilot != hsi_obs_deg_mag_copilot))
-        {
-            self.hsi_obs_deg_mag_copilot.set(hsi_obs_deg_mag_pilot);
-            if let Some(thranda_hsi_hdef_dots_copilot) = self.thranda_hsi_hdef_dots_copilot.as_mut()
-            {
-                thranda_hsi_hdef_dots_copilot.set(thranda_hsi_hdef_dots_pilot);
+        // If both HSIs are in RNAV mode...
+        if hsi_selector == 2 && hsi_selector2 == 2 {
+            if hsi_obs_deg_mag_pilot != hsi_obs_deg_mag_copilot {
+                self.hsi_obs_deg_mag_copilot.set(hsi_obs_deg_mag_pilot);
+            }
+            if thranda_hsi_hdef_dots_pilot != thranda_hsi_hdef_dots_copilot {
+                if let Some(thranda_hsi_hdef_dots_copilot) =
+                    self.thranda_hsi_hdef_dots_copilot.as_mut()
+                {
+                    thranda_hsi_hdef_dots_copilot.set(thranda_hsi_hdef_dots_pilot);
+                }
             }
         }
     }
