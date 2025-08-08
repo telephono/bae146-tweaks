@@ -7,6 +7,7 @@ This plugin tries to remedy some inconsistencies in Just Flight's BAe 146 Profes
 - Fix nose wheel steering with UFMC
 - Fix radio power
 - ~~Fix crashes during TMS manipulation~~ (fixed in BAe 146 v1.0.2)
+- Fix copilot HSI when both HSIs are in RNAV mode
 - Synchronize throttle levers 3 and 4 based on throttle lever 2
 
 ## Installation
