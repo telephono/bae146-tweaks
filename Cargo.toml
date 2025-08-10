@@ -9,5 +9,6 @@ publish = false
 crate-type = ["cdylib"]
 
 [dependencies]
+almost = "0.2.0"
 thiserror = "2.0.12"
 xplm = "0.4.2"
