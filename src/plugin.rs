@@ -3,6 +3,7 @@ use std::sync::Mutex;
 
 use xplm::data::borrowed::DataRef;
 use xplm::data::StringRead;
+use xplm::debugln;
 use xplm::flight_loop::FlightLoop;
 use xplm::menu::{CheckItem, Menu};
 use xplm::plugin::management::plugin_with_signature;
