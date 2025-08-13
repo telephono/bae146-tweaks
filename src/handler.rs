@@ -228,18 +228,9 @@ impl FlightLoopCallback for FlightLoopHandler {
 pub(crate) struct SyncThrottlesMenuHandler;
 
 impl CheckHandler for SyncThrottlesMenuHandler {
-    fn item_checked(&mut self, item: &CheckItem, checked: bool) {
+    fn item_checked(&mut self, _item: &CheckItem, checked: bool) {
         if let Ok(mut sync_throttles) = SYNC_THROTTLES.lock() {
-            debugln!(
-                "{PLUGIN_NAME} SyncThrottlesMenuHandler: checked = {:?}, item = {:?}, sync_throttles = {:?}",
-                checked,
-                item.checked(),
-                *sync_throttles,
-            );
-
-            if *sync_throttles != checked {
-                *sync_throttles = checked;
-            }
+            *sync_throttles = checked;
         }
     }
 }
