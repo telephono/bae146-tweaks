@@ -262,6 +262,9 @@ impl FlightLoopCallback for FlightLoopHandler {
         // We need to wait until all datarefs created by SASL are available...
         if !self.initialization_done {
             if self.initialize().is_ok() {
+                // Run flightloop callback on every flightloop from now on
+                state.call_next_loop();
+
                 self.initialization_done = true;
                 debugln!("{PLUGIN_NAME} initialization complete");
             } else {
@@ -272,8 +275,9 @@ impl FlightLoopCallback for FlightLoopHandler {
         }
 
         if !self.onetime_actions_done {
-            self.onetime_actions_done = true;
             self.onetime_actions();
+
+            self.onetime_actions_done = true;
             debugln!("{PLUGIN_NAME} one-time actions complete");
         }
 
@@ -286,8 +290,5 @@ impl FlightLoopCallback for FlightLoopHandler {
         self.fix_copilot_hsi();
 
         self.synchonize_throttle_levers();
-
-        // Run flightloop callback on every flightloop from now on
-        state.call_next_loop();
     }
 }
