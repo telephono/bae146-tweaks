@@ -1,58 +1,77 @@
 use xplm::command::Command;
 use xplm::data::borrowed::DataRef;
 use xplm::data::{ArrayRead, ArrayReadWrite, DataRead, DataReadWrite, ReadWrite};
+use xplm::debugln;
 use xplm::flight_loop::FlightLoopCallback;
 use xplm::menu::{CheckHandler, CheckItem};
 
-use crate::plugin::{PluginError, PLUGIN_NAME, SYNC_THROTTLES};
+use crate::plugin::{PLUGIN_NAME, SYNC_THROTTLES, PluginError};
 
 pub(crate) struct FlightLoopHandler {
     initialization_done: bool,
     onetime_actions_done: bool,
 
-    /// sim/view/default_view
+    /// `sim/view/default_view`
     default_view: Command,
 
-    /// thranda/electrical/ExtPwrGPUAvailable
+    /// `thranda/electrical/ExtPwrGPUAvailable`
     thranda_gpu_available: Option<DataRef<i32>>,
 
-    /// sim/cockpit2/electrical/GPU_generator_volts
+    /// `sim/cockpit2/electrical/GPU_generator_volts`
     gpu_generator_volts: DataRef<f32, ReadWrite>,
 
-    /// sim/operation/override/override_GPU_volts
+    /// `sim/operation/override/override_GPU_volts`
     override_gpu_volts: DataRef<i32, ReadWrite>,
 
-    /// sim/cockpit2/hydraulics/indicators/hydraulic_pressure_2
+    /// `sim/cockpit2/hydraulics/indicators/hydraulic_pressure_2`
     hydraulic_pressure_green: DataRef<f32>,
 
-    /// sim/operation/override/override_wheel_steer
+    /// `sim/operation/override/override_wheel_steer`
     override_wheel_steer: DataRef<i32, ReadWrite>,
 
-    /// sim/cockpit2/electrical/bus_volts
+    /// `sim/cockpit2/electrical/bus_volts`
     bus_volts: DataRef<[f32]>,
     bus_volts_slice: [f32; 2],
 
-    /// sim/cockpit2/radios/actuators/gps_power
+    /// `sim/cockpit2/radios/actuators/gps_power`
     radio_gps1_power: DataRef<i32>,
 
-    /// sim/cockpit2/radios/actuators/gps2_power
+    /// `sim/cockpit2/radios/actuators/gps2_power`
     radio_gps2_power: DataRef<i32>,
 
-    /// sim/cockpit2/radios/actuators/com1_power
+    /// `sim/cockpit2/radios/actuators/com1_power`
     radio_com1_power: DataRef<i32, ReadWrite>,
 
-    /// sim/cockpit2/radios/actuators/com2_power
+    /// `sim/cockpit2/radios/actuators/com2_power`
     radio_com2_power: DataRef<i32, ReadWrite>,
 
-    /// thranda/generic/com1/genCom1Pwr
+    /// `thranda/generic/com1/genCom1Pwr`
     thranda_radio_com1_power: Option<DataRef<i32>>,
 
-    /// thranda/generic/com1/genCom2Pwr [sic!]
+    /// `thranda/generic/com1/genCom2Pwr` [sic!]
     thranda_radio_com2_power: Option<DataRef<i32>>,
 
-    /// sim/cockpit2/engine/actuators/throttle_ratio
+    /// `sim/cockpit2/engine/actuators/throttle_ratio`
     throttle_ratio: DataRef<[f32], ReadWrite>,
     throttle_ratio_slice: [f32; 4],
+
+    /// `sim/cockpit/switches/HSI_selector`
+    hsi_selector: DataRef<i32>,
+
+    /// `sim/cockpit/switches/HSI_selector2`
+    hsi_selector2: DataRef<i32>,
+
+    /// `sim/cockpit2/radios/actuators/hsi_obs_deg_mag_pilot`
+    hsi_obs_deg_mag_pilot: DataRef<f32>,
+
+    /// `sim/cockpit2/radios/actuators/hsi_obs_deg_mag_copilot`
+    hsi_obs_deg_mag_copilot: DataRef<f32, ReadWrite>,
+
+    /// `thranda/anim/hsiHdefDotsPilot`
+    thranda_hsi_hdef_dots_pilot: Option<DataRef<f32>>,
+
+    /// `thranda/anim/hsiHdefDotsCoPilot`
+    thranda_hsi_hdef_dots_copilot: Option<DataRef<f32, ReadWrite>>,
 }
 
 impl FlightLoopHandler {
@@ -89,6 +108,18 @@ impl FlightLoopHandler {
             throttle_ratio: DataRef::find("sim/cockpit2/engine/actuators/throttle_ratio")?
                 .writeable()?,
             throttle_ratio_slice: [0.0; 4],
+
+            hsi_selector: DataRef::find("sim/cockpit/switches/HSI_selector")?,
+            hsi_selector2: DataRef::find("sim/cockpit/switches/HSI_selector2")?,
+            hsi_obs_deg_mag_pilot: DataRef::find(
+                "sim/cockpit2/radios/actuators/hsi_obs_deg_mag_pilot",
+            )?,
+            hsi_obs_deg_mag_copilot: DataRef::find(
+                "sim/cockpit2/radios/actuators/hsi_obs_deg_mag_copilot",
+            )?
+            .writeable()?,
+            thranda_hsi_hdef_dots_pilot: None,
+            thranda_hsi_hdef_dots_copilot: None,
         };
 
         Ok(handler)
@@ -109,6 +140,16 @@ impl FlightLoopHandler {
             self.thranda_radio_com2_power = Some(DataRef::find("thranda/generic/com1/genCom2Pwr")?);
         }
 
+        if self.thranda_hsi_hdef_dots_pilot.is_none() {
+            self.thranda_hsi_hdef_dots_pilot =
+                Some(DataRef::find("thranda/anim/hsiHdefDotsPilot")?);
+        }
+
+        if self.thranda_hsi_hdef_dots_copilot.is_none() {
+            self.thranda_hsi_hdef_dots_copilot =
+                Some(DataRef::find("thranda/anim/hsiHdefDotsCoPilo")?.writeable()?);
+        }
+
         Ok(())
     }
 
@@ -122,13 +163,13 @@ impl FlightLoopHandler {
     /// The current GPU/external power isn't compatible with X-Plane's current GPU/external power
     /// implementation. This corrects the supplied generator voltage...
     fn fix_gpu_generator_volts(&mut self) {
-        let gpu_available = self.thranda_gpu_available.as_ref().map_or(0, |d| d.get());
+        let gpu_available = self.thranda_gpu_available.as_ref().map_or(0, DataRead::get);
         let gpu_generator_volts = self.gpu_generator_volts.get();
 
         // Set override GPU volts if BAe 146 GPU is connected
-        if gpu_available == 1 && gpu_generator_volts != 27.5 {
+        if gpu_available == 1 && !almost::equal(gpu_generator_volts, 27.5) {
             self.gpu_generator_volts.set(27.5);
-        } else if gpu_available == 0 && gpu_generator_volts != 0.0 {
+        } else if gpu_available == 0 && !almost::zero(gpu_generator_volts) {
             self.gpu_generator_volts.set(0.0);
         }
     }
@@ -149,7 +190,7 @@ impl FlightLoopHandler {
         let thranda_radio_com1_power = self
             .thranda_radio_com1_power
             .as_ref()
-            .map_or(0, |d| d.get());
+            .map_or(0, DataRead::get);
         let radio_com1_power = self.radio_com1_power.get();
         let radio_gps1_power = self.radio_gps1_power.get();
 
@@ -164,7 +205,7 @@ impl FlightLoopHandler {
         let thranda_radio_com2_power = self
             .thranda_radio_com2_power
             .as_ref()
-            .map_or(0, |d| d.get());
+            .map_or(0, DataRead::get);
         let radio_com2_power = self.radio_com2_power.get();
         let radio_gps2_power = self.radio_gps2_power.get();
 
@@ -174,6 +215,35 @@ impl FlightLoopHandler {
             }
         } else if radio_com2_power == 1 {
             self.radio_com2_power.set(0);
+        }
+    }
+
+    /// Fix copilot HSI when both HSI are in RNAV mode
+    fn fix_copilot_hsi(&mut self) {
+        let hsi_selector = self.hsi_selector.get();
+        let hsi_selector2 = self.hsi_selector2.get();
+        let hsi_obs_deg_mag_pilot = self.hsi_obs_deg_mag_pilot.get();
+        let hsi_obs_deg_mag_copilot = self.hsi_obs_deg_mag_copilot.get();
+        let thranda_hsi_hdef_dots_pilot = self
+            .thranda_hsi_hdef_dots_pilot
+            .as_ref()
+            .map_or(0.0, DataRead::get);
+        let thranda_hsi_hdef_dots_copilot = self
+            .thranda_hsi_hdef_dots_copilot
+            .as_ref()
+            .map_or(0.0, DataRead::get);
+
+        // If both HSIs are in RNAV mode...
+        if hsi_selector == 2 && hsi_selector2 == 2 {
+            if !almost::equal(hsi_obs_deg_mag_pilot, hsi_obs_deg_mag_copilot) {
+                self.hsi_obs_deg_mag_copilot.set(hsi_obs_deg_mag_pilot);
+            }
+            if !almost::equal(thranda_hsi_hdef_dots_pilot, thranda_hsi_hdef_dots_copilot)
+                && let Some(thranda_hsi_hdef_dots_copilot) =
+                    self.thranda_hsi_hdef_dots_copilot.as_mut()
+            {
+                thranda_hsi_hdef_dots_copilot.set(thranda_hsi_hdef_dots_pilot);
+            }
         }
     }
 
@@ -192,10 +262,13 @@ impl FlightLoopHandler {
 }
 
 impl FlightLoopCallback for FlightLoopHandler {
-    fn flight_loop(&mut self, state: &mut xplm::flight_loop::LoopState) {
+    fn flight_loop(&mut self, state: &mut xplm::flight_loop::LoopState<'_>) {
         // We need to wait until all datarefs created by SASL are available...
         if !self.initialization_done {
             if self.initialize().is_ok() {
+                // Run flightloop callback on every flightloop from now on
+                state.call_next_loop();
+
                 self.initialization_done = true;
                 debugln!("{PLUGIN_NAME} initialization complete");
                 return;
@@ -207,8 +280,9 @@ impl FlightLoopCallback for FlightLoopHandler {
         }
 
         if !self.onetime_actions_done {
-            self.onetime_actions_done = true;
             self.onetime_actions();
+
+            self.onetime_actions_done = true;
             debugln!("{PLUGIN_NAME} one-time actions complete");
         }
 
@@ -218,10 +292,9 @@ impl FlightLoopCallback for FlightLoopHandler {
 
         self.fix_radio();
 
-        self.synchonize_throttle_levers();
+        self.fix_copilot_hsi();
 
-        // Run flightloop callback on every flightloop from now on
-        state.call_next_loop();
+        self.synchonize_throttle_levers();
     }
 }
 
