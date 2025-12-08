@@ -4,7 +4,7 @@ use xplm::data::{ArrayRead, ArrayReadWrite, DataRead, DataReadWrite, ReadWrite};
 use xplm::debugln;
 use xplm::flight_loop::FlightLoopCallback;
 
-use crate::plugin::{PluginError, PLUGIN_NAME};
+use crate::plugin::{PLUGIN_NAME, PluginError};
 
 pub(crate) struct FlightLoopHandler {
     initialization_done: bool,
@@ -168,7 +168,7 @@ impl FlightLoopHandler {
         // Set override GPU volts if BAe 146 GPU is connected
         if gpu_available == 1 && !almost::equal(gpu_generator_volts, 27.5) {
             self.gpu_generator_volts.set(27.5);
-        } else if gpu_available == 0 && !almost::equal(gpu_generator_volts, 0.0) {
+        } else if gpu_available == 0 && !almost::zero(gpu_generator_volts) {
             self.gpu_generator_volts.set(0.0);
         }
     }
