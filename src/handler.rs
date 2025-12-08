@@ -3,8 +3,9 @@ use xplm::data::borrowed::DataRef;
 use xplm::data::{ArrayRead, ArrayReadWrite, DataRead, DataReadWrite, ReadWrite};
 use xplm::debugln;
 use xplm::flight_loop::FlightLoopCallback;
+use xplm::menu::{CheckHandler, CheckItem};
 
-use crate::plugin::{PLUGIN_NAME, PluginError};
+use crate::plugin::{PLUGIN_NAME, SYNC_THROTTLES, PluginError};
 
 pub(crate) struct FlightLoopHandler {
     initialization_done: bool,
@@ -248,12 +249,15 @@ impl FlightLoopHandler {
 
     /// Align throttle lever 3 and 4 with throttle lever 2
     fn synchonize_throttle_levers(&mut self) {
-        self.throttle_ratio.get(&mut self.throttle_ratio_slice);
+        let sync_throttles = SYNC_THROTTLES.try_lock().is_ok_and(|l| *l);
+        if sync_throttles {
+            self.throttle_ratio.get(&mut self.throttle_ratio_slice);
 
-        self.throttle_ratio_slice[2] = self.throttle_ratio_slice[1];
-        self.throttle_ratio_slice[3] = self.throttle_ratio_slice[1];
+            self.throttle_ratio_slice[2] = self.throttle_ratio_slice[1];
+            self.throttle_ratio_slice[3] = self.throttle_ratio_slice[1];
 
-        self.throttle_ratio.set(&self.throttle_ratio_slice);
+            self.throttle_ratio.set(&self.throttle_ratio_slice);
+        }
     }
 }
 
@@ -267,8 +271,9 @@ impl FlightLoopCallback for FlightLoopHandler {
 
                 self.initialization_done = true;
                 debugln!("{PLUGIN_NAME} initialization complete");
+                return;
             } else {
-                // Exit flight loop early and try again after the next interval...
+                // Try again after the next interval...
                 debugln!("{PLUGIN_NAME} waiting for initialization...");
                 return;
             }
@@ -290,5 +295,15 @@ impl FlightLoopCallback for FlightLoopHandler {
         self.fix_copilot_hsi();
 
         self.synchonize_throttle_levers();
+    }
+}
+
+pub(crate) struct SyncThrottlesMenuHandler;
+
+impl CheckHandler for SyncThrottlesMenuHandler {
+    fn item_checked(&mut self, _item: &CheckItem, checked: bool) {
+        if let Ok(mut sync_throttles) = SYNC_THROTTLES.lock() {
+            *sync_throttles = checked;
+        }
     }
 }
