@@ -1,8 +1,8 @@
 use std::ffi::NulError;
 use std::sync::Mutex;
 
-use xplm::data::borrowed::DataRef;
 use xplm::data::StringRead;
+use xplm::data::borrowed::DataRef;
 use xplm::debugln;
 use xplm::flight_loop::FlightLoop;
 use xplm::menu::{CheckItem, Menu};
@@ -38,19 +38,19 @@ impl Plugin for TweaksPlugin {
         }
 
         let sync_throttles = SYNC_THROTTLES.try_lock().is_ok_and(|l| *l);
-        let _plugin_menu = Menu::new("BAe 146 Tweaks")?;
-        _plugin_menu.add_child(CheckItem::new(
+        let plugin_menu = Menu::new("BAe 146 Tweaks")?;
+        plugin_menu.add_child(CheckItem::new(
             "Sync throttles",
             sync_throttles,
             SyncThrottlesMenuHandler,
         )?);
-        _plugin_menu.add_to_plugins_menu();
+        plugin_menu.add_to_plugins_menu();
 
         let handler = FlightLoopHandler::new()?;
 
         let plugin = Self {
             flight_loop: FlightLoop::new(handler),
-            _plugin_menu,
+            _plugin_menu: plugin_menu,
         };
 
         debugln!("{PLUGIN_NAME} startup complete");

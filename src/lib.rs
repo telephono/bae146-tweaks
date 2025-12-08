@@ -3,7 +3,15 @@
 
 use xplm::xplane_plugin;
 
+mod component;
 mod handler;
 mod plugin;
+
+// Components
+mod gpu;
+mod hsi;
+mod nosewheel_steering;
+mod radio;
+mod throttle_levers;
 
 xplane_plugin!(plugin::TweaksPlugin);
