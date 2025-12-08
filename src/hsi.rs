@@ -57,7 +57,7 @@ impl CopilotHSI {
 
         if self.thranda_hsi_hdef_dots_copilot.is_none() {
             self.thranda_hsi_hdef_dots_copilot =
-                Some(DataRef::find("thranda/anim/hsiHdefDotsCoPilo")?.writeable()?);
+                Some(DataRef::find("thranda/anim/hsiHdefDotsCoPilot")?.writeable()?);
         }
 
         Ok(())
