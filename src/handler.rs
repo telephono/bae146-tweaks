@@ -45,8 +45,8 @@ impl FlightLoopCallback for FlightLoopHandler {
             let initialization_done = self.components.iter().all(|comp| comp.is_initialized());
             if initialization_done {
                 // Run flightloop callback on every flightloop from now on
-                self.initialization_done = true;
                 state.call_next_loop();
+                self.initialization_done = true;
                 debugln!("{PLUGIN_NAME} initialization complete");
             } else {
                 debugln!("{PLUGIN_NAME} waiting for initialization...");
