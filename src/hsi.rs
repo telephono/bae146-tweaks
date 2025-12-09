@@ -35,7 +35,9 @@ impl CopilotHSI {
             is_initialized: false,
 
             hsi_selector: DataRef::find("sim/cockpit/switches/HSI_selector")?,
-            hsi_selector2: DataRef::find("sim/cockpit/switches/HSI_selector2")?,
+            hsi_selector2: DataRef::find(
+                "sim/cockpit/switches/HSI_selector2",
+            )?,
             hsi_obs_deg_mag_pilot: DataRef::find(
                 "sim/cockpit2/radios/actuators/hsi_obs_deg_mag_pilot",
             )?,
