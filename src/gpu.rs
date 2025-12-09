@@ -1,7 +1,9 @@
 use xplm::data::borrowed::DataRef;
 use xplm::data::{DataRead, DataReadWrite, ReadWrite};
+use xplm::debugln;
 
 use crate::component::PluginComponent;
+use crate::plugin::PLUGIN_NAME;
 use crate::plugin::PluginError;
 
 /// The current GPU/external power isn't compatible with X-Plane's
@@ -62,6 +64,9 @@ impl PluginComponent for GeneratorVolts {
             if self.initialize().is_ok() {
                 self.override_gpu_volts.set(1);
                 self.is_initialized = true;
+                debugln!(
+                    "{PLUGIN_NAME} FixGPUGeneratorVolts component initialized"
+                );
             } else {
                 return;
             }

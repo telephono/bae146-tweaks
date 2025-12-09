@@ -1,7 +1,9 @@
 use xplm::data::borrowed::DataRef;
 use xplm::data::{ArrayRead, DataRead, DataReadWrite, ReadWrite};
+use xplm::debugln;
 
 use crate::component::PluginComponent;
+use crate::plugin::PLUGIN_NAME;
 use crate::plugin::PluginError;
 
 /// Fix radio power based on bus voltage available
@@ -86,6 +88,7 @@ impl PluginComponent for Radio {
         if !self.is_initialized {
             if self.initialize().is_ok() {
                 self.is_initialized = true;
+                debugln!("{PLUGIN_NAME} FixRadioPower component initialized");
             } else {
                 return;
             }

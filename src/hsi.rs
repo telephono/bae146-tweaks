@@ -1,7 +1,9 @@
 use xplm::data::borrowed::DataRef;
 use xplm::data::{DataRead, DataReadWrite, ReadWrite};
+use xplm::debugln;
 
 use crate::component::PluginComponent;
+use crate::plugin::PLUGIN_NAME;
 use crate::plugin::PluginError;
 
 /// Fix copilot HSI when both HSI are in RNAV mode
@@ -76,6 +78,7 @@ impl PluginComponent for CopilotHSI {
         if !self.is_initialized {
             if self.initialize().is_ok() {
                 self.is_initialized = true;
+                debugln!("{PLUGIN_NAME} FixCopilotHSI component initialized");
             } else {
                 return;
             }
