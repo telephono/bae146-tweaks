@@ -7,7 +7,7 @@ use crate::plugin::PLUGIN_NAME;
 use crate::plugin::PluginError;
 
 /// Fix copilot HSI when both HSI are in RNAV mode
-pub(crate) struct CopilotHSI {
+pub struct CopilotHSI {
     is_initialized: bool,
 
     /// `sim/cockpit/switches/HSI_selector`
@@ -30,7 +30,7 @@ pub(crate) struct CopilotHSI {
 }
 
 impl CopilotHSI {
-    pub(crate) fn new() -> Result<Self, PluginError> {
+    pub fn new() -> Result<Self, PluginError> {
         let component = Self {
             is_initialized: false,
 

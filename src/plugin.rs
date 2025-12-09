@@ -11,15 +11,15 @@ use xplm::plugin::{Plugin, PluginInfo};
 
 use crate::handler::{FlightLoopHandler, SyncThrottlesMenuHandler};
 
-pub(crate) static PLUGIN_NAME: &str =
+pub static PLUGIN_NAME: &str =
     concat!("BAe 146 Tweaks", " v", env!("CARGO_PKG_VERSION"));
 static PLUGIN_SIGNATURE: &str =
     concat!("io.github.telephono.", env!("CARGO_PKG_NAME"));
 static PLUGIN_DESCRIPTION: &str = "BAe 146 fixes and tweaks";
 
-pub(crate) static SYNC_THROTTLES: Mutex<bool> = Mutex::new(true);
+pub static SYNC_THROTTLES: Mutex<bool> = Mutex::new(true);
 
-pub(crate) struct TweaksPlugin {
+pub struct TweaksPlugin {
     flight_loop: FlightLoop,
     _plugin_menu: Menu,
 }
@@ -83,7 +83,7 @@ impl Plugin for TweaksPlugin {
 }
 
 #[derive(Debug, thiserror::Error)]
-pub(crate) enum PluginError {
+pub enum PluginError {
     #[error("{PLUGIN_NAME} is already running")]
     AlreadyRunning,
 

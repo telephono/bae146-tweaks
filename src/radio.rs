@@ -8,7 +8,7 @@ use crate::plugin::PluginError;
 
 /// Fix radio power based on bus voltage available
 #[allow(clippy::struct_field_names)]
-pub(crate) struct Radio {
+pub struct Radio {
     is_initialized: bool,
 
     /// `sim/cockpit2/electrical/bus_volts`
@@ -35,7 +35,7 @@ pub(crate) struct Radio {
 }
 
 impl Radio {
-    pub(crate) fn new() -> Result<Self, PluginError> {
+    pub fn new() -> Result<Self, PluginError> {
         let component = Self {
             is_initialized: false,
 

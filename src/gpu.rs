@@ -10,7 +10,7 @@ use crate::plugin::PluginError;
 /// current GPU/external power implementation.
 /// This corrects the supplied generator voltage...
 #[allow(clippy::struct_field_names)]
-pub(crate) struct GeneratorVolts {
+pub struct GeneratorVolts {
     is_initialized: bool,
 
     /// `thranda/electrical/ExtPwrGPUAvailable`
@@ -24,7 +24,7 @@ pub(crate) struct GeneratorVolts {
 }
 
 impl GeneratorVolts {
-    pub(crate) fn new() -> Result<Self, PluginError> {
+    pub fn new() -> Result<Self, PluginError> {
         let component = Self {
             is_initialized: false,
 

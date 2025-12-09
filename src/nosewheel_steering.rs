@@ -9,7 +9,7 @@ use crate::plugin::PluginError;
 /// UFMC sometimes blocks nosewheel steering...
 /// This enables nosewheel steering as long as there is enough pressure
 /// in the green system.
-pub(crate) struct NosewheelSteering {
+pub struct NosewheelSteering {
     is_initialized: bool,
 
     /// `sim/cockpit2/hydraulics/indicators/hydraulic_pressure_2`
@@ -20,7 +20,7 @@ pub(crate) struct NosewheelSteering {
 }
 
 impl NosewheelSteering {
-    pub(crate) fn new() -> Result<Self, PluginError> {
+    pub fn new() -> Result<Self, PluginError> {
         let component = Self {
             is_initialized: false,
 

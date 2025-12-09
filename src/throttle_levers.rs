@@ -7,7 +7,7 @@ use crate::plugin::PluginError;
 use crate::plugin::{PLUGIN_NAME, SYNC_THROTTLES};
 
 /// Align throttle lever 3 and 4 with throttle lever 2
-pub(crate) struct ThrottleLevers {
+pub struct ThrottleLevers {
     is_initialized: bool,
 
     /// `sim/cockpit2/engine/actuators/throttle_ratio`
@@ -16,7 +16,7 @@ pub(crate) struct ThrottleLevers {
 }
 
 impl ThrottleLevers {
-    pub(crate) fn new() -> Result<Self, PluginError> {
+    pub fn new() -> Result<Self, PluginError> {
         let component = Self {
             is_initialized: false,
 

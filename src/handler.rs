@@ -12,15 +12,13 @@ use crate::nosewheel_steering::NosewheelSteering;
 use crate::radio::Radio;
 use crate::throttle_levers::ThrottleLevers;
 
-pub(crate) struct FlightLoopHandler {
-    initialization_done: bool,
+pub struct FlightLoopHandler {
     components: [Box<dyn PluginComponent>; 5],
 }
 
 impl FlightLoopHandler {
-    pub(crate) fn new() -> Result<Self, PluginError> {
+    pub fn new() -> Result<Self, PluginError> {
         let handler = Self {
-            initialization_done: false,
             components: [
                 Box::new(GeneratorVolts::new()?),
                 Box::new(CopilotHSI::new()?),
@@ -41,22 +39,18 @@ impl FlightLoopCallback for FlightLoopHandler {
         }
 
         // We need to wait until all datarefs created by SASL are available...
-        if !self.initialization_done {
-            let initialization_done =
-                self.components.iter().all(|comp| comp.is_initialized());
-            if initialization_done {
-                // Run flightloop callback on every flightloop from now on
-                state.call_next_loop();
-                self.initialization_done = true;
-                debugln!("{PLUGIN_NAME} initialization complete");
-            } else {
-                debugln!("{PLUGIN_NAME} waiting for initialization...");
-            }
+        let initialization_done =
+            self.components.iter().all(|comp| comp.is_initialized());
+        if initialization_done {
+            // Run flightloop callback on every flightloop from now on
+            state.call_next_loop();
+        } else {
+            debugln!("{PLUGIN_NAME} waiting for initialization...");
         }
     }
 }
 
-pub(crate) struct SyncThrottlesMenuHandler;
+pub struct SyncThrottlesMenuHandler;
 
 impl CheckHandler for SyncThrottlesMenuHandler {
     fn item_checked(&mut self, _item: &CheckItem, checked: bool) {
