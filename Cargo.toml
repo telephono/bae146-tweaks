@@ -1,6 +1,6 @@
 [package]
 name = "tweaks"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2024"
 license = "MIT"
 publish = false
@@ -9,6 +9,9 @@ publish = false
 crate-type = ["cdylib"]
 
 [dependencies]
-almost = "0.2.0"
-thiserror = "2.0.12"
-xplm = "0.4.2"
+almost = "=0.2.0"
+thiserror = "=2.0.17"
+xplm = "=0.4.2"
+
+[lints.clippy]
+pedantic = "warn"

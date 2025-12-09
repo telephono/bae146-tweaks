@@ -1,8 +1,8 @@
 use std::ffi::NulError;
 use std::sync::Mutex;
 
-use xplm::data::borrowed::DataRef;
 use xplm::data::StringRead;
+use xplm::data::borrowed::DataRef;
 use xplm::debugln;
 use xplm::flight_loop::FlightLoop;
 use xplm::menu::{CheckItem, Menu};
@@ -11,13 +11,15 @@ use xplm::plugin::{Plugin, PluginInfo};
 
 use crate::handler::{FlightLoopHandler, SyncThrottlesMenuHandler};
 
-pub(crate) static PLUGIN_NAME: &str = concat!("BAe 146 Tweaks", " v", env!("CARGO_PKG_VERSION"));
-static PLUGIN_SIGNATURE: &str = concat!("io.github.telephono.", env!("CARGO_PKG_NAME"));
+pub static PLUGIN_NAME: &str =
+    concat!("BAe 146 Tweaks", " v", env!("CARGO_PKG_VERSION"));
+static PLUGIN_SIGNATURE: &str =
+    concat!("io.github.telephono.", env!("CARGO_PKG_NAME"));
 static PLUGIN_DESCRIPTION: &str = "BAe 146 fixes and tweaks";
 
-pub(crate) static SYNC_THROTTLES: Mutex<bool> = Mutex::new(true);
+pub static SYNC_THROTTLES: Mutex<bool> = Mutex::new(true);
 
-pub(crate) struct TweaksPlugin {
+pub struct TweaksPlugin {
     flight_loop: FlightLoop,
     _plugin_menu: Menu,
 }
@@ -30,27 +32,30 @@ impl Plugin for TweaksPlugin {
             return Err(PluginError::AlreadyRunning);
         }
 
-        let acf_icao: DataRef<[u8]> = DataRef::find("sim/aircraft/view/acf_ICAO")?;
+        let acf_icao: DataRef<[u8]> =
+            DataRef::find("sim/aircraft/view/acf_ICAO")?;
         let acf_icao = acf_icao.get_as_string()?;
         match acf_icao.as_str() {
-            "B461" | "B462" | "B463" => debugln!("{PLUGIN_NAME} starting up..."),
+            "B461" | "B462" | "B463" => {
+                debugln!("{PLUGIN_NAME} starting up...");
+            }
             _ => return Err(PluginError::AircraftNotSupported(acf_icao)),
         }
 
-        let sync_throttles = SYNC_THROTTLES.try_lock().is_ok_and(|l| *l);
-        let _plugin_menu = Menu::new("BAe 146 Tweaks")?;
-        _plugin_menu.add_child(CheckItem::new(
+        let sync_throttles = SYNC_THROTTLES.try_lock().is_ok_and(|lock| *lock);
+        let plugin_menu = Menu::new("BAe 146 Tweaks")?;
+        plugin_menu.add_child(CheckItem::new(
             "Sync throttles",
             sync_throttles,
             SyncThrottlesMenuHandler,
         )?);
-        _plugin_menu.add_to_plugins_menu();
+        plugin_menu.add_to_plugins_menu();
 
         let handler = FlightLoopHandler::new()?;
 
         let plugin = Self {
             flight_loop: FlightLoop::new(handler),
-            _plugin_menu,
+            _plugin_menu: plugin_menu,
         };
 
         debugln!("{PLUGIN_NAME} startup complete");
@@ -78,7 +83,7 @@ impl Plugin for TweaksPlugin {
 }
 
 #[derive(Debug, thiserror::Error)]
-pub(crate) enum PluginError {
+pub enum PluginError {
     #[error("{PLUGIN_NAME} is already running")]
     AlreadyRunning,
 
