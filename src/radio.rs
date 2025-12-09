@@ -93,14 +93,14 @@ impl PluginComponent for Radio {
 
         self.bus_volts.get(&mut self.bus_volts_slice);
 
-        let thranda_radio_com1_power = self
-            .thranda_radio_com1_power
-            .as_ref()
-            .map_or(0, DataRead::get);
         let radio_com1_power = self.radio_com1_power.get();
         let radio_gps1_power = self.radio_gps1_power.get();
 
         if self.bus_volts_slice[0] > 21.0 && radio_gps1_power == 1 {
+            let thranda_radio_com1_power = self
+                .thranda_radio_com1_power
+                .as_ref()
+                .map_or(0, DataRead::get);
             if radio_com1_power != thranda_radio_com1_power {
                 self.radio_com1_power.set(thranda_radio_com1_power);
             }
@@ -108,14 +108,14 @@ impl PluginComponent for Radio {
             self.radio_com1_power.set(0);
         }
 
-        let thranda_radio_com2_power = self
-            .thranda_radio_com2_power
-            .as_ref()
-            .map_or(0, DataRead::get);
         let radio_com2_power = self.radio_com2_power.get();
         let radio_gps2_power = self.radio_gps2_power.get();
 
         if self.bus_volts_slice[1] > 21.0 && radio_gps2_power == 1 {
+            let thranda_radio_com2_power = self
+                .thranda_radio_com2_power
+                .as_ref()
+                .map_or(0, DataRead::get);
             if radio_com2_power != thranda_radio_com2_power {
                 self.radio_com2_power.set(thranda_radio_com2_power);
             }
