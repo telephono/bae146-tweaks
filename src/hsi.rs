@@ -83,19 +83,20 @@ impl PluginComponent for CopilotHSI {
 
         let hsi_selector = self.hsi_selector.get();
         let hsi_selector2 = self.hsi_selector2.get();
-        let hsi_obs_deg_mag_pilot = self.hsi_obs_deg_mag_pilot.get();
-        let hsi_obs_deg_mag_copilot = self.hsi_obs_deg_mag_copilot.get();
-        let thranda_hsi_hdef_dots_pilot = self
-            .thranda_hsi_hdef_dots_pilot
-            .as_ref()
-            .map_or(0.0, DataRead::get);
-        let thranda_hsi_hdef_dots_copilot = self
-            .thranda_hsi_hdef_dots_copilot
-            .as_ref()
-            .map_or(0.0, DataRead::get);
 
         // If both HSIs are in RNAV mode...
         if hsi_selector == 2 && hsi_selector2 == 2 {
+            let hsi_obs_deg_mag_pilot = self.hsi_obs_deg_mag_pilot.get();
+            let hsi_obs_deg_mag_copilot = self.hsi_obs_deg_mag_copilot.get();
+            let thranda_hsi_hdef_dots_pilot = self
+                .thranda_hsi_hdef_dots_pilot
+                .as_ref()
+                .map_or(0.0, DataRead::get);
+            let thranda_hsi_hdef_dots_copilot = self
+                .thranda_hsi_hdef_dots_copilot
+                .as_ref()
+                .map_or(0.0, DataRead::get);
+
             if !almost::equal(hsi_obs_deg_mag_pilot, hsi_obs_deg_mag_copilot) {
                 self.hsi_obs_deg_mag_copilot.set(hsi_obs_deg_mag_pilot);
             }
