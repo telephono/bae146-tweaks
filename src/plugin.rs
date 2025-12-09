@@ -37,12 +37,12 @@ impl Plugin for TweaksPlugin {
         let acf_icao = acf_icao.get_as_string()?;
         match acf_icao.as_str() {
             "B461" | "B462" | "B463" => {
-                debugln!("{PLUGIN_NAME} starting up...")
+                debugln!("{PLUGIN_NAME} starting up...");
             }
             _ => return Err(PluginError::AircraftNotSupported(acf_icao)),
         }
 
-        let sync_throttles = SYNC_THROTTLES.try_lock().is_ok_and(|l| *l);
+        let sync_throttles = SYNC_THROTTLES.try_lock().is_ok_and(|lock| *lock);
         let plugin_menu = Menu::new("BAe 146 Tweaks")?;
         plugin_menu.add_child(CheckItem::new(
             "Sync throttles",
