@@ -21,8 +21,10 @@ impl NosewheelSteering {
             hydraulic_pressure_green: DataRef::find(
                 "sim/cockpit2/hydraulics/indicators/hydraulic_pressure_2",
             )?,
-            override_wheel_steer: DataRef::find("sim/operation/override/override_wheel_steer")?
-                .writeable()?,
+            override_wheel_steer: DataRef::find(
+                "sim/operation/override/override_wheel_steer",
+            )?
+            .writeable()?,
         };
 
         Ok(component)

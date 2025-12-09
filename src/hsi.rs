@@ -56,8 +56,10 @@ impl CopilotHSI {
         }
 
         if self.thranda_hsi_hdef_dots_copilot.is_none() {
-            self.thranda_hsi_hdef_dots_copilot =
-                Some(DataRef::find("thranda/anim/hsiHdefDotsCoPilot")?.writeable()?);
+            self.thranda_hsi_hdef_dots_copilot = Some(
+                DataRef::find("thranda/anim/hsiHdefDotsCoPilot")?
+                    .writeable()?,
+            );
         }
 
         Ok(())
@@ -97,9 +99,11 @@ impl PluginComponent for CopilotHSI {
             if !almost::equal(hsi_obs_deg_mag_pilot, hsi_obs_deg_mag_copilot) {
                 self.hsi_obs_deg_mag_copilot.set(hsi_obs_deg_mag_pilot);
             }
-            if !almost::equal(thranda_hsi_hdef_dots_pilot, thranda_hsi_hdef_dots_copilot)
-                && let Some(thranda_hsi_hdef_dots_copilot) =
-                    self.thranda_hsi_hdef_dots_copilot.as_mut()
+            if !almost::equal(
+                thranda_hsi_hdef_dots_pilot,
+                thranda_hsi_hdef_dots_copilot,
+            ) && let Some(thranda_hsi_hdef_dots_copilot) =
+                self.thranda_hsi_hdef_dots_copilot.as_mut()
             {
                 thranda_hsi_hdef_dots_copilot.set(thranda_hsi_hdef_dots_pilot);
             }

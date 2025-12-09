@@ -26,11 +26,15 @@ impl GeneratorVolts {
         let component = Self {
             is_initialized: false,
 
+            gpu_generator_volts: DataRef::find(
+                "sim/cockpit2/electrical/GPU_generator_volts",
+            )?
+            .writeable()?,
+            override_gpu_volts: DataRef::find(
+                "sim/operation/override/override_GPU_volts",
+            )?
+            .writeable()?,
             thranda_gpu_available: None,
-            gpu_generator_volts: DataRef::find("sim/cockpit2/electrical/GPU_generator_volts")?
-                .writeable()?,
-            override_gpu_volts: DataRef::find("sim/operation/override/override_GPU_volts")?
-                .writeable()?,
         };
 
         Ok(component)
@@ -63,7 +67,8 @@ impl PluginComponent for GeneratorVolts {
             }
         }
 
-        let gpu_available = self.thranda_gpu_available.as_ref().map_or(0, DataRead::get);
+        let gpu_available =
+            self.thranda_gpu_available.as_ref().map_or(0, DataRead::get);
         let gpu_generator_volts = self.gpu_generator_volts.get();
 
         // Set override GPU volts if BAe 146 GPU is connected

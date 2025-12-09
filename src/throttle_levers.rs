@@ -14,8 +14,10 @@ pub(crate) struct ThrottleLevers {
 impl ThrottleLevers {
     pub(crate) fn new() -> Result<Self, PluginError> {
         let component = Self {
-            throttle_ratio: DataRef::find("sim/cockpit2/engine/actuators/throttle_ratio")?
-                .writeable()?,
+            throttle_ratio: DataRef::find(
+                "sim/cockpit2/engine/actuators/throttle_ratio",
+            )?
+            .writeable()?,
             throttle_ratio_slice: [0.0; 4],
         };
 

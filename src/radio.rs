@@ -39,12 +39,20 @@ impl Radio {
 
             bus_volts: DataRef::find("sim/cockpit2/electrical/bus_volts")?,
             bus_volts_slice: [0.0; 2],
-            radio_gps1_power: DataRef::find("sim/cockpit2/radios/actuators/gps_power")?,
-            radio_gps2_power: DataRef::find("sim/cockpit2/radios/actuators/gps2_power")?,
-            radio_com1_power: DataRef::find("sim/cockpit2/radios/actuators/com1_power")?
-                .writeable()?,
-            radio_com2_power: DataRef::find("sim/cockpit2/radios/actuators/com2_power")?
-                .writeable()?,
+            radio_gps1_power: DataRef::find(
+                "sim/cockpit2/radios/actuators/gps_power",
+            )?,
+            radio_gps2_power: DataRef::find(
+                "sim/cockpit2/radios/actuators/gps2_power",
+            )?,
+            radio_com1_power: DataRef::find(
+                "sim/cockpit2/radios/actuators/com1_power",
+            )?
+            .writeable()?,
+            radio_com2_power: DataRef::find(
+                "sim/cockpit2/radios/actuators/com2_power",
+            )?
+            .writeable()?,
             thranda_radio_com1_power: None,
             thranda_radio_com2_power: None,
         };
@@ -55,11 +63,13 @@ impl Radio {
     /// Fetch SASL datarefs if they are available
     fn initialize(&mut self) -> Result<(), PluginError> {
         if self.thranda_radio_com1_power.is_none() {
-            self.thranda_radio_com1_power = Some(DataRef::find("thranda/generic/com1/genCom1Pwr")?);
+            self.thranda_radio_com1_power =
+                Some(DataRef::find("thranda/generic/com1/genCom1Pwr")?);
         }
 
         if self.thranda_radio_com2_power.is_none() {
-            self.thranda_radio_com2_power = Some(DataRef::find("thranda/generic/com1/genCom2Pwr")?);
+            self.thranda_radio_com2_power =
+                Some(DataRef::find("thranda/generic/com1/genCom2Pwr")?);
         }
 
         Ok(())

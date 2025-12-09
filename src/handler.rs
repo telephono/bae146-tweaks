@@ -42,7 +42,8 @@ impl FlightLoopCallback for FlightLoopHandler {
 
         // We need to wait until all datarefs created by SASL are available...
         if !self.initialization_done {
-            let initialization_done = self.components.iter().all(|comp| comp.is_initialized());
+            let initialization_done =
+                self.components.iter().all(|comp| comp.is_initialized());
             if initialization_done {
                 // Run flightloop callback on every flightloop from now on
                 state.call_next_loop();

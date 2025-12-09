@@ -11,8 +11,10 @@ use xplm::plugin::{Plugin, PluginInfo};
 
 use crate::handler::{FlightLoopHandler, SyncThrottlesMenuHandler};
 
-pub(crate) static PLUGIN_NAME: &str = concat!("BAe 146 Tweaks", " v", env!("CARGO_PKG_VERSION"));
-static PLUGIN_SIGNATURE: &str = concat!("io.github.telephono.", env!("CARGO_PKG_NAME"));
+pub(crate) static PLUGIN_NAME: &str =
+    concat!("BAe 146 Tweaks", " v", env!("CARGO_PKG_VERSION"));
+static PLUGIN_SIGNATURE: &str =
+    concat!("io.github.telephono.", env!("CARGO_PKG_NAME"));
 static PLUGIN_DESCRIPTION: &str = "BAe 146 fixes and tweaks";
 
 pub(crate) static SYNC_THROTTLES: Mutex<bool> = Mutex::new(true);
@@ -30,10 +32,13 @@ impl Plugin for TweaksPlugin {
             return Err(PluginError::AlreadyRunning);
         }
 
-        let acf_icao: DataRef<[u8]> = DataRef::find("sim/aircraft/view/acf_ICAO")?;
+        let acf_icao: DataRef<[u8]> =
+            DataRef::find("sim/aircraft/view/acf_ICAO")?;
         let acf_icao = acf_icao.get_as_string()?;
         match acf_icao.as_str() {
-            "B461" | "B462" | "B463" => debugln!("{PLUGIN_NAME} starting up..."),
+            "B461" | "B462" | "B463" => {
+                debugln!("{PLUGIN_NAME} starting up...")
+            }
             _ => return Err(PluginError::AircraftNotSupported(acf_icao)),
         }
 
