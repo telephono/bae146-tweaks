@@ -3,7 +3,7 @@ use xplm::flight_loop::FlightLoopCallback;
 use xplm::menu::{CheckHandler, CheckItem};
 
 use crate::component::PluginComponent;
-use crate::plugin::{PLUGIN_NAME, PluginError, SYNC_THROTTLES};
+use crate::plugin::{PLUGIN_NAME, SYNC_THROTTLES};
 
 // Components
 use crate::gpu::GeneratorVolts;
@@ -17,18 +17,16 @@ pub struct FlightLoopHandler {
 }
 
 impl FlightLoopHandler {
-    pub fn new() -> Result<Self, PluginError> {
-        let handler = Self {
+    pub fn new() -> Self {
+        Self {
             components: [
-                Box::new(GeneratorVolts::new()?),
-                Box::new(CopilotHSI::new()?),
-                Box::new(NosewheelSteering::new()?),
-                Box::new(Radio::new()?),
-                Box::new(ThrottleLevers::new()?),
+                Box::new(GeneratorVolts::new()),
+                Box::new(CopilotHSI::new()),
+                Box::new(NosewheelSteering::new()),
+                Box::new(Radio::new()),
+                Box::new(ThrottleLevers::new()),
             ],
-        };
-
-        Ok(handler)
+        }
     }
 }
 

@@ -12,20 +12,20 @@ pub struct Radio {
     is_initialized: bool,
 
     /// `sim/cockpit2/electrical/bus_volts`
-    bus_volts: DataRef<[f32]>,
+    bus_volts: Option<DataRef<[f32]>>,
     bus_volts_slice: [f32; 2],
 
     /// `sim/cockpit2/radios/actuators/gps_power`
-    radio_gps1_power: DataRef<i32>,
+    radio_gps1_power: Option<DataRef<i32>>,
 
     /// `sim/cockpit2/radios/actuators/gps2_power`
-    radio_gps2_power: DataRef<i32>,
+    radio_gps2_power: Option<DataRef<i32>>,
 
     /// `sim/cockpit2/radios/actuators/com1_power`
-    radio_com1_power: DataRef<i32, ReadWrite>,
+    radio_com1_power: Option<DataRef<i32, ReadWrite>>,
 
     /// `sim/cockpit2/radios/actuators/com2_power`
-    radio_com2_power: DataRef<i32, ReadWrite>,
+    radio_com2_power: Option<DataRef<i32, ReadWrite>>,
 
     /// `thranda/generic/com1/genCom1Pwr`
     thranda_radio_com1_power: Option<DataRef<i32>>,
@@ -35,35 +35,54 @@ pub struct Radio {
 }
 
 impl Radio {
-    pub fn new() -> Result<Self, PluginError> {
-        let component = Self {
+    pub fn new() -> Self {
+        Self {
             is_initialized: false,
 
-            bus_volts: DataRef::find("sim/cockpit2/electrical/bus_volts")?,
+            bus_volts: None,
             bus_volts_slice: [0.0; 2],
-            radio_gps1_power: DataRef::find(
-                "sim/cockpit2/radios/actuators/gps_power",
-            )?,
-            radio_gps2_power: DataRef::find(
-                "sim/cockpit2/radios/actuators/gps2_power",
-            )?,
-            radio_com1_power: DataRef::find(
-                "sim/cockpit2/radios/actuators/com1_power",
-            )?
-            .writeable()?,
-            radio_com2_power: DataRef::find(
-                "sim/cockpit2/radios/actuators/com2_power",
-            )?
-            .writeable()?,
+            radio_gps1_power: None,
+            radio_gps2_power: None,
+            radio_com1_power: None,
+            radio_com2_power: None,
             thranda_radio_com1_power: None,
             thranda_radio_com2_power: None,
-        };
-
-        Ok(component)
+        }
     }
 
     /// Fetch SASL datarefs if they are available
     fn initialize(&mut self) -> Result<(), PluginError> {
+        if self.bus_volts.is_none() {
+            self.bus_volts =
+                Some(DataRef::find("sim/cockpit2/electrical/bus_volts")?);
+        }
+
+        if self.radio_gps1_power.is_none() {
+            self.radio_gps1_power = Some(DataRef::find(
+                "sim/cockpit2/radios/actuators/gps_power",
+            )?);
+        }
+
+        if self.radio_gps2_power.is_none() {
+            self.radio_gps2_power = Some(DataRef::find(
+                "sim/cockpit2/radios/actuators/gps2_power",
+            )?);
+        }
+
+        if self.radio_com1_power.is_none() {
+            self.radio_com1_power = Some(
+                DataRef::find("sim/cockpit2/radios/actuators/com1_power")?
+                    .writeable()?,
+            );
+        }
+
+        if self.radio_com2_power.is_none() {
+            self.radio_com2_power = Some(
+                DataRef::find("sim/cockpit2/radios/actuators/com2_power")?
+                    .writeable()?,
+            );
+        }
+
         if self.thranda_radio_com1_power.is_none() {
             self.thranda_radio_com1_power =
                 Some(DataRef::find("thranda/generic/com1/genCom1Pwr")?);
@@ -94,36 +113,49 @@ impl PluginComponent for Radio {
             }
         }
 
-        self.bus_volts.get(&mut self.bus_volts_slice);
-
-        let radio_com1_power = self.radio_com1_power.get();
-        let radio_gps1_power = self.radio_gps1_power.get();
-
-        if self.bus_volts_slice[0] > 21.0 && radio_gps1_power == 1 {
-            let thranda_radio_com1_power = self
-                .thranda_radio_com1_power
-                .as_ref()
-                .map_or(0, DataRead::get);
-            if radio_com1_power != thranda_radio_com1_power {
-                self.radio_com1_power.set(thranda_radio_com1_power);
-            }
-        } else if radio_com1_power == 1 {
-            self.radio_com1_power.set(0);
+        if let Some(bus_volts) = self.bus_volts.as_ref() {
+            bus_volts.get(&mut self.bus_volts_slice);
         }
 
-        let radio_com2_power = self.radio_com2_power.get();
-        let radio_gps2_power = self.radio_gps2_power.get();
+        let radio_com1_power =
+            self.radio_com1_power.as_ref().map_or(0, DataRead::get);
+        let radio_com2_power =
+            self.radio_com2_power.as_ref().map_or(0, DataRead::get);
+        let radio_gps1_power =
+            self.radio_gps1_power.as_ref().map_or(0, DataRead::get);
+        let radio_gps2_power =
+            self.radio_gps2_power.as_ref().map_or(0, DataRead::get);
+        let thranda_radio_com1_power = self
+            .thranda_radio_com1_power
+            .as_ref()
+            .map_or(0, DataRead::get);
+        let thranda_radio_com2_power = self
+            .thranda_radio_com2_power
+            .as_ref()
+            .map_or(0, DataRead::get);
+
+        if self.bus_volts_slice[0] > 21.0 && radio_gps1_power == 1 {
+            if radio_com1_power != thranda_radio_com1_power
+                && let Some(radio_com1_power) = self.radio_com1_power.as_mut()
+            {
+                radio_com1_power.set(thranda_radio_com1_power);
+            }
+        } else if radio_com1_power == 1
+            && let Some(radio_com1_power) = self.radio_com1_power.as_mut()
+        {
+            radio_com1_power.set(0);
+        }
 
         if self.bus_volts_slice[1] > 21.0 && radio_gps2_power == 1 {
-            let thranda_radio_com2_power = self
-                .thranda_radio_com2_power
-                .as_ref()
-                .map_or(0, DataRead::get);
-            if radio_com2_power != thranda_radio_com2_power {
-                self.radio_com2_power.set(thranda_radio_com2_power);
+            if radio_com2_power != thranda_radio_com2_power
+                && let Some(radio_com2_power) = self.radio_com2_power.as_mut()
+            {
+                radio_com2_power.set(thranda_radio_com2_power);
             }
-        } else if radio_com2_power == 1 {
-            self.radio_com2_power.set(0);
+        } else if radio_com2_power == 1
+            && let Some(radio_com2_power) = self.radio_com2_power.as_mut()
+        {
+            radio_com2_power.set(0);
         }
     }
 }

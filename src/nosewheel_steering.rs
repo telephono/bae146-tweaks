@@ -13,27 +13,37 @@ pub struct NosewheelSteering {
     is_initialized: bool,
 
     /// `sim/cockpit2/hydraulics/indicators/hydraulic_pressure_2`
-    hydraulic_pressure_green: DataRef<f32>,
+    hydraulic_pressure_green: Option<DataRef<f32>>,
 
     /// `sim/operation/override/override_wheel_steer`
-    override_wheel_steer: DataRef<i32, ReadWrite>,
+    override_wheel_steer: Option<DataRef<i32, ReadWrite>>,
 }
 
 impl NosewheelSteering {
-    pub fn new() -> Result<Self, PluginError> {
-        let component = Self {
+    pub fn new() -> Self {
+        Self {
             is_initialized: false,
 
-            hydraulic_pressure_green: DataRef::find(
-                "sim/cockpit2/hydraulics/indicators/hydraulic_pressure_2",
-            )?,
-            override_wheel_steer: DataRef::find(
-                "sim/operation/override/override_wheel_steer",
-            )?
-            .writeable()?,
-        };
+            hydraulic_pressure_green: None,
+            override_wheel_steer: None,
+        }
+    }
 
-        Ok(component)
+    fn initialize(&mut self) -> Result<(), PluginError> {
+        if self.hydraulic_pressure_green.is_none() {
+            self.hydraulic_pressure_green = Some(DataRef::find(
+                "sim/cockpit2/hydraulics/indicators/hydraulic_pressure_2",
+            )?);
+        }
+
+        if self.override_wheel_steer.is_none() {
+            self.override_wheel_steer = Some(
+                DataRef::find("sim/operation/override/override_wheel_steer")?
+                    .writeable()?,
+            );
+        }
+
+        Ok(())
     }
 }
 
@@ -44,16 +54,25 @@ impl PluginComponent for NosewheelSteering {
 
     fn update(&mut self) {
         if !self.is_initialized {
-            self.is_initialized = true;
-            debugln!(
-                "{PLUGIN_NAME} FixNosewheelSteering component initialized"
-            );
+            if self.initialize().is_ok() {
+                self.is_initialized = true;
+                debugln!(
+                    "{PLUGIN_NAME} FixNosewheelSteering component initialized"
+                );
+            } else {
+                return;
+            }
         }
 
-        if self.hydraulic_pressure_green.get() > 100.0 {
-            self.override_wheel_steer.set(1);
-        } else {
-            self.override_wheel_steer.set(0);
+        if let Some(override_wheel_steer) = self.override_wheel_steer.as_mut()
+            && let Some(hydraulic_pressure_green) =
+                self.hydraulic_pressure_green.as_ref()
+        {
+            if hydraulic_pressure_green.get() > 100.0 {
+                override_wheel_steer.set(1);
+            } else {
+                override_wheel_steer.set(0);
+            }
         }
     }
 }

@@ -51,7 +51,7 @@ impl Plugin for TweaksPlugin {
         )?);
         plugin_menu.add_to_plugins_menu();
 
-        let handler = FlightLoopHandler::new()?;
+        let handler = FlightLoopHandler::new();
 
         let plugin = Self {
             flight_loop: FlightLoop::new(handler),
