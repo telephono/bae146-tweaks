@@ -93,10 +93,10 @@ pub enum PluginError {
     #[error(transparent)]
     NulError(#[from] NulError),
 
-    #[error(transparent)]
+    #[error("Command not found: {0}")]
     CommandFindError(#[from] xplm::command::CommandFindError),
 
-    #[error(transparent)]
+    #[error("DataRef not found: {0}")]
     DataRefFindError(#[from] xplm::data::borrowed::FindError),
 
     #[error(transparent)]
