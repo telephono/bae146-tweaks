@@ -11,7 +11,7 @@ crate-type = ["cdylib"]
 [dependencies]
 almost = "=0.2.0"
 thiserror = "=2.0.17"
-xplm = { git = "https://git.hotstart.net/skiselkov/rust-xplm.git" }
+xplm = { git = "https://codeberg.org/skiselkov/rust-xplm.git" }
 
 [lints.clippy]
 pedantic = "warn"
